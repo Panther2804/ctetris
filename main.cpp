@@ -3,7 +3,7 @@
 #include "treiber.h"
 #include <iostream>
 
-const bool debug = true;
+const bool debug = false;
 
 const bool SerialActive = true;
 
@@ -34,7 +34,7 @@ bool dets = false;
 
 int posx = 0;  //position and rotation of the piece
 int posy = 0;
-int rotation = 0;
+int rotation = 3;
 
 int posxold = 0;  //position and rotation of the piece
 int posyold = 0;
@@ -58,7 +58,7 @@ void setup() {
     sprintln('1');
     posx = 3;
     posy = 3;
-    playfield[1][1] = 5;
+    //playfield[1][1] = 5;
     transfer();
     minit();
     mprint();
@@ -67,7 +67,9 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+
     delay(1000);
+    sprintln(rotation+48);
     draw(lp, 0); //undraw old piece
     draw(lp, 1); //draw new piece
     transfer();
@@ -79,8 +81,8 @@ void loop() {
 }
 
 void minit() {  //blanks the matrix (initializer)
-    for (int i = 0; i <= sizeM; i++) {
-        for (int o = 0; o <= sizeM; o++) {
+    for (int i = 0; i < sizeM; i++) {
+        for (int o = 0; o < sizeM; o++) {
             a[i][o] = 0;
         }
     }
@@ -186,7 +188,7 @@ bool draw(const bool b[2][4], int color) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx + i, posy - o, color, true) == false) {
+                        if (mput(posx - o, posy + i, color, true) == false) {
                             undoplayfield();
                             return false;
                         }
