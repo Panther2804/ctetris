@@ -70,10 +70,16 @@ void loop() {
 
     delay(1000);
     sprintln(rotation+48);
-    draw(lp, 0); //undraw old piece
-    draw(lp, 1); //draw new piece
+
+
+    draw(lp, 1,true); //draw new piece
+
     transfer();
     mprint();
+    draw(lp, 0, false); //undraw old piece
+    transfer(); //undo later (debug code)
+    mprint(); //undo later
+
     rotation++;
     delay(1000);
 
@@ -129,17 +135,19 @@ bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only
         playfield[x][y] = color;
         return true;
     }
+    playfield[x][y] = color;
+    return true;
 }
 
 
-bool draw(const bool b[2][4], int color) {  //handels piece drawing
+bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
     switch (rotation) {
 
         case 0: //no rot
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx + i, posy + o, color, true) == false) {
+                        if (mput(posx + i, posy + o, color, ccheck) == false) {
                             undoplayfield();
                             return false;
                         }
@@ -156,7 +164,7 @@ bool draw(const bool b[2][4], int color) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx + o, posy - i, color, true) == false) {
+                        if (mput(posx + o, posy - i, color, ccheck) == false) {
                             undoplayfield();
                             return false;
                         }
@@ -172,7 +180,7 @@ bool draw(const bool b[2][4], int color) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx - i, posy - o, color, true) == false) {
+                        if (mput(posx - i, posy - o, color, ccheck) == false) {
                             undoplayfield();
                             return false;
                         }
@@ -188,7 +196,7 @@ bool draw(const bool b[2][4], int color) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx - o, posy + i, color, true) == false) {
+                        if (mput(posx - o, posy + i, color, ccheck) == false) {
                             undoplayfield();
                             return false;
                         }
