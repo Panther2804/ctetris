@@ -16,5 +16,6 @@ void transfer();
 bool mput(int ,int , int, bool);
 void undoplayfield();
 bool draw(const bool[2][4],int,bool);
+void pieceselect(int);
 
 #endif //TETRISCLION_MAIN_H

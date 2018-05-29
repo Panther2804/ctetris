@@ -22,8 +22,21 @@ const bool lp[maxpiecesizex][maxpiecesizey] = {  //the l piece
         {1, 0, 0, 0},
         {1, 1, 1, 0},};
 
+
 const bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
                                                 {1, 1, 1, 0},};
+
+const bool cube[maxpiecesizex][maxpiecesizey] = {{0, 1, 1, 0}, //the "cube"
+                                                {0, 1, 1, 0},};
+
+const bool line[maxpiecesizex][maxpiecesizey] = {{0, 0, 0, 0}, //the line
+                                                {1, 1, 1, 1},};
+
+const bool halfh[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0}, //the half h
+                                                {1, 1, 1, 0},};
+
+bool piece[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0},
+                                            {1, 1, 1, 0},};
 
 int playfield[sizeplayfieldx][sizeplayfieldy];
 int playfieldold[sizeplayfieldx][sizeplayfieldy];
@@ -53,6 +66,7 @@ void setup() {
 
     // put your setup code here, to run once:
 
+    srand(1);
 
     sbegin(9600);
     sprintln('1');
@@ -72,11 +86,11 @@ void loop() {
     sprintln(rotation+48);
 
 
-    draw(lp, 1,true); //draw new piece
+    draw(piece, 1,true); //draw new piece
 
     transfer();
     mprint();
-    draw(lp, 0, false); //undraw old piece
+    draw(piece, 0, false); //undraw old piece
     transfer(); //undo later (debug code)
     mprint(); //undo later
 
@@ -222,4 +236,23 @@ void undoplayfield() {
     memcpy(playfield, playfieldold, sizeof(playfield));
     sprintln('u');
 }
+
+void pieceselect(int a) {
+    switch(a) {
+        case 0:
+            piece = lp;
+        case 1:
+            piece =lpm;
+        case 2:
+            piece =cube;
+        case 3:
+            piece =line;
+        case 4:
+            piece =halfh;
+    }
+}
+
+
+
+
 
