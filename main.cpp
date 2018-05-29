@@ -1,7 +1,9 @@
 
 #include "main.h"
 #include "treiber.h"
+#include <iostream>
 
+const bool debug = true;
 
 const bool SerialActive = true;
 
@@ -17,10 +19,11 @@ const int maxpiecesizey = 4;
 
 
 const bool lp[maxpiecesizex][maxpiecesizey] = {  //the l piece
-        { 1, 0, 0, 0 }, { 1, 1, 1, 0 }, };
+        {1, 0, 0, 0},
+        {1, 1, 1, 0},};
 
-const bool lpm[maxpiecesizex][maxpiecesizey] = { { 0, 0, 1, 0 }, //the mirrored l piece
-                                                 { 1, 1, 1, 0 }, };
+const bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
+                                                {1, 1, 1, 0},};
 
 int playfield[sizeplayfieldx][sizeplayfieldy];
 int playfieldold[sizeplayfieldx][sizeplayfieldy];
@@ -37,9 +40,10 @@ int posxold = 0;  //position and rotation of the piece
 int posyold = 0;
 int rotationold = 0;
 
+
 int main() {
     setup();
-    while(true) {
+    while (true) {
         loop();
     }
 }
@@ -48,28 +52,28 @@ int main() {
 void setup() {
 
     // put your setup code here, to run once:
+
+
     sbegin(9600);
     sprintln('1');
     posx = 3;
     posy = 3;
+    playfield[1][1] = 5;
     transfer();
+    minit();
+    mprint();
 
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    minit();
-    mprint();
     delay(1000);
-    draw(lp,0); //undraw old piece
-    draw(lp,1); //draw new piece
+    draw(lp, 0); //undraw old piece
+    draw(lp, 1); //draw new piece
     transfer();
     mprint();
-    rotation ++;
-    sprint('l');
-
-
-
+    rotation++;
+    delay(1000);
 
 
 }
@@ -92,9 +96,9 @@ void playfieldinit() {  //blanks the matrix (initializer)
 }
 
 void mprint() {  // does the actual drawing
-    for (int i = 0; i <= sizeM; i++) {
-        for (int o = 0; o <= sizeM; o++) {
-            sprint(a[i][o]);
+    for (int i = 0; i < sizeM; i++) {
+        for (int o = 0; o < sizeM; o++) {
+            sprint(48 + a[i][o]);
 
         }
         sprintln(' ');
@@ -107,13 +111,12 @@ void transfer() { //transfers playfield onto canvas, updates pos & rot
     posyold = posy;
     rotationold = rotation;
     memcpy(playfieldold, playfield, sizeof(playfield));
-    for (int i = 0; i <= sizeplayfieldx; i++) {
-        for (int o = 0; o <= sizeplayfieldy; o++) {
+    for (int i = 0; i < sizeplayfieldx; i++) {
+        for (int o = 0; o < sizeplayfieldy; o++) {
             a[playfieldposx + i][playfieldposy + o] = playfield[i][o];
         }
     }
 }
-
 
 
 bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only for playfield
@@ -127,75 +130,79 @@ bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only
 }
 
 
-bool draw(const bool b[2][4],int color) {  //handels piece drawing
-switch (rotation) {
+bool draw(const bool b[2][4], int color) {  //handels piece drawing
+    switch (rotation) {
 
-case 0: //no rot
-for (int i = 0; i <= maxpiecesizex; i++) {
-for (int o = 0; o <= maxpiecesizey; o++) {
-if (b[i][o]) {
-if (mput(posx + i, posy + o, color, true) == false) {
-undoplayfield();
-return false;
-}
-}
+        case 0: //no rot
+            for (int i = 0; i < maxpiecesizex; i++) {
+                for (int o = 0; o < maxpiecesizey; o++) {
+                    if (b[i][o]) {
+                        if (mput(posx + i, posy + o, color, true) == false) {
+                            undoplayfield();
+                            return false;
+                        }
+                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                    }
 
-}
-}
-return true;
+                }
+            }
+            return true;
 
-break;
+            break;
 
-case 1:  //one clockwise
-for (int i = 0; i <= maxpiecesizex; i++) {
-for (int o = 0; o <= maxpiecesizey; o++) {
-if (b[i][o]) {
-if (mput(posx + o, posy - i, color, true) == false) {
-undoplayfield();
-return false;
-}
-}
-}
-}
-return true;
+        case 1:  //one clockwise
+            for (int i = 0; i < maxpiecesizex; i++) {
+                for (int o = 0; o < maxpiecesizey; o++) {
+                    if (b[i][o]) {
+                        if (mput(posx + o, posy - i, color, true) == false) {
+                            undoplayfield();
+                            return false;
+                        }
+                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                    }
+                }
+            }
+            return true;
 
-break;
+            break;
 
-case 2: //upside down
-for (int i = 0; i <= maxpiecesizex; i++) {
-for (int o = 0; o <= maxpiecesizey; o++) {
-if (b[i][o]) {
-if (mput(posx - i, posy - o, color, true) == false) {
-undoplayfield();
-return false;
-}
-}
-}
-}
-return true;
+        case 2: //upside down
+            for (int i = 0; i < maxpiecesizex; i++) {
+                for (int o = 0; o < maxpiecesizey; o++) {
+                    if (b[i][o]) {
+                        if (mput(posx - i, posy - o, color, true) == false) {
+                            undoplayfield();
+                            return false;
+                        }
+                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                    }
+                }
+            }
+            return true;
 
-break;
+            break;
 
-case 3: //one counterclockwise
-for (int i = 0; i <= maxpiecesizex; i++) {
-for (int o = 0; o <= maxpiecesizey; o++) {
-if (b[i][o]) {
-if (mput(posx + i, posy - o, color, true) == false) {
-undoplayfield();
-return false;
-}
-}
-}
-}
-return true;
+        case 3: //one counterclockwise
+            for (int i = 0; i < maxpiecesizex; i++) {
+                for (int o = 0; o < maxpiecesizey; o++) {
+                    if (b[i][o]) {
+                        if (mput(posx + i, posy - o, color, true) == false) {
+                            undoplayfield();
+                            return false;
+                        }
+                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                    }
+                }
+            }
+            return true;
 
-break;
-default:
-sprintln('r');
-rotation = 0;
-return false;
+            break;
+        default:
+            sprintln('r');
+            rotation = 0;
+            return false;
 
-}
+    }
 }
 
 void undoplayfield() {

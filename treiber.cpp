@@ -1,8 +1,10 @@
 #include <string>
 #include <iostream>
 #include <thread_db.h>
+#include <sstream>
 #include <stdio.h>
 #include <string.h>
+
 
 using namespace std;
 
@@ -38,3 +40,4 @@ int delay(int milisec)
 void memcpy(int a[7][12], int b[7][12], int c) {
     a = b;
 }
+
