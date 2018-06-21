@@ -11,6 +11,7 @@ using namespace std;
 
 int fun() {
 //    std::cout << "Hello, World!" << std::endl;
+    return 0;
 }
 
 void sprint(char a) {
@@ -23,7 +24,7 @@ void sprintln(char a) {
 
 void sbegin(int a) {
 
-};
+}
 
 int delay(int milisec)
 {

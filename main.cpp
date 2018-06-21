@@ -8,10 +8,10 @@ const bool debug = false;
 const bool SerialActive = true;
 
 const int sizeM = 12; //size of the matrix
-const int sizeplayfieldx = 7;
+const int sizeplayfieldx = 7; //size of plafield (own layer in matrix)
 const int sizeplayfieldy = 12;
 
-const int playfieldposx = 0;
+const int playfieldposx = 0; //offset of playfield
 const int playfieldposy = 0;
 
 const int maxpiecesizex = 2;
@@ -23,7 +23,7 @@ const bool lp[maxpiecesizex][maxpiecesizey] = {  //the l piece
         {1, 1, 1, 0},};
 
 
-const bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
+bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
                                                 {1, 1, 1, 0},};
 
 const bool cube[maxpiecesizex][maxpiecesizey] = {{0, 1, 1, 0}, //the "cube"
@@ -43,13 +43,11 @@ int playfieldold[sizeplayfieldx][sizeplayfieldy];
 
 int a[sizeM][sizeM];
 
-bool dets = false;
-
 int posx = 0;  //position and rotation of the piece
 int posy = 0;
 int rotation = 3;
 
-int posxold = 0;  //position and rotation of the piece
+int posxold = 0;  //position and rotation of the "old" piece
 int posyold = 0;
 int rotationold = 0;
 
@@ -84,7 +82,7 @@ void loop() {
 
     delay(1000);
     sprintln(rotation+48);
-
+    pieceselect(1);
 
     draw(piece, 1,true); //draw new piece
 
@@ -240,17 +238,27 @@ void undoplayfield() {
 void pieceselect(int a) {
     switch(a) {
         case 0:
-            piece = lp;
+           cnstcpy(piece, lp); // piece = lp;
         case 1:
-            piece =lpm;
+            cnstcpy(piece, lpm);// piece =lpm;
         case 2:
-            piece =cube;
+            cnstcpy(piece, cube);//piece =cube;
         case 3:
-            piece =line;
+            cnstcpy(piece, line);//piece =line;
         case 4:
-            piece =halfh;
+            cnstcpy(piece, halfh);//piece =halfh;
     }
 }
+
+void cnstcpy(bool a[2][4], const  bool b[2][4]) {
+    for(int i = 0; i < maxpiecesizex; i ++) {
+        for(int o = 0; o < maxpiecesizey; o ++) {
+            a[i][o] = b[i][o];
+        }
+
+    }
+}
+
 
 
 
