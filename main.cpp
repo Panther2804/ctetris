@@ -8,8 +8,8 @@ const bool debug = false;
 const bool SerialActive = true;
 
 const int sizeM = 12; //size of the matrix
-const int sizeplayfieldx = 7; //size of plafield (own layer in matrix)
-const int sizeplayfieldy = 12;
+const int sizeplayfieldx = 9; //size of plafield (own layer in matrix)
+const int sizeplayfieldy = 14;
 
 const int playfieldposx = 0; //offset of playfield
 const int playfieldposy = 0;
@@ -24,16 +24,16 @@ const bool lp[maxpiecesizex][maxpiecesizey] = {  //the l piece
 
 
 bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
-                                                {1, 1, 1, 0},};
+                                          {1, 1, 1, 0},};
 
 const bool cube[maxpiecesizex][maxpiecesizey] = {{0, 1, 1, 0}, //the "cube"
-                                                {0, 1, 1, 0},};
+                                                 {0, 1, 1, 0},};
 
 const bool line[maxpiecesizex][maxpiecesizey] = {{0, 0, 0, 0}, //the line
-                                                {1, 1, 1, 1},};
+                                                 {1, 1, 1, 1},};
 
 const bool halfh[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0}, //the half h
-                                                {1, 1, 1, 0},};
+                                                  {1, 1, 1, 0},};
 
 bool piece[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0},
                                             {1, 1, 1, 0},};
@@ -45,12 +45,16 @@ int a[sizeM][sizeM];
 
 int posx = 0;  //position and rotation of the piece
 int posy = 0;
-int rotation = 3;
+int rotation = 0;
 
 int posxold = 0;  //position and rotation of the "old" piece
 int posyold = 0;
 int rotationold = 0;
 
+bool playerturn = false; //if true checks input if false does physicsgu
+const int timeout = 10; //timeout before new piece
+int timerem = 0;
+int score = 0;
 
 int main() {
     setup();
@@ -65,12 +69,13 @@ void setup() {
     // put your setup code here, to run once:
 
     srand(1);
-
+    playfieldinit();
     sbegin(9600);
     sprintln('1');
     posx = 3;
     posy = 3;
-    //playfield[1][1] = 5;
+    playfield[1][4] = 5;
+    playfield[1][4] = 5;
     transfer();
     minit();
     mprint();
@@ -79,23 +84,48 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-
+    /*
     delay(1000);
-    sprintln(rotation+48);
+    sprintln(rotation + 48);
     pieceselect(1);
 
-    draw(piece, 1,true); //draw new piece
+    draw(piece, 1, true); //draw new piece
 
     transfer();
     mprint();
     draw(piece, 0, false); //undraw old piece
-    transfer(); //undo later (debug code)
-    mprint(); //undo later
+    //transfer(); //undo later (debug code)
+    //mprint(); //undo later
 
-    rotation++;
+
     delay(1000);
 
+    */
 
+playerturn =  !playerturn;
+if(playerturn) {
+
+}
+else {
+    posx += 1;
+    if(draw(piece, 1, true) == false) {
+        if(timerem == 0) timerem = timeout;
+        if(timerem == 1) {
+            posy = 3;
+            posx = sizeplayfieldx/2;
+            pieceselect(1);
+            score ++;
+            linecheck();
+
+        }
+    }
+}
+
+    transfer();
+    mprint();
+    draw(piece, 0, false);
+
+    delay(1000);
 }
 
 void minit() {  //blanks the matrix (initializer)
@@ -106,25 +136,47 @@ void minit() {  //blanks the matrix (initializer)
     }
 }
 
-void playfieldinit() {  //blanks the matrix (initializer)
-    for (int i = 0; i <= sizeplayfieldx; i++) {
-        for (int o = 0; o <= sizeplayfieldy; o++) {
+
+void playfieldinit() {  //blanks the playfield (initializer)
+    for (int i = 1; i <= sizeplayfieldx; i++) { //sets everything to 0
+        for (int o = 1; o <= sizeplayfieldy; o++) {
             playfield[i][o] = 0;
         }
     }
+
+
+    for (int i = 0; i < sizeplayfieldx; i++) {
+        playfield[0][i] = 2;
+    }
+
+    for (int i = sizeplayfieldy - 1; i < sizeplayfieldx; i++) {
+        playfield[0][i] = 2;
+    }
+
+    for (int i = 0; i < sizeplayfieldy; i++) {
+        playfield[i][0] = 2;
+    }
+
+    for (int i = 0; i < sizeplayfieldy; i++) {
+        playfield[i][sizeplayfieldx - 1] = 2;
+    }
+
+
     memcpy(playfield, playfieldold, sizeof(playfield));
 }
+
 
 void mprint() {  // does the actual drawing
     for (int i = 0; i < sizeM; i++) {
         for (int o = 0; o < sizeM; o++) {
-            sprint(48 + a[i][o]);
+            sprint(48 + a[o][i]);
 
         }
         sprintln(' ');
     }
     sprintln('-');
 }
+
 
 void transfer() { //transfers playfield onto canvas, updates pos & rot
     posxold = posx;
@@ -152,7 +204,7 @@ bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only
 }
 
 
-bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
+bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
     switch (rotation) {
 
         case 0: //no rot
@@ -163,7 +215,14 @@ bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
                             undoplayfield();
                             return false;
                         }
-                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                        if (debug) {
+                            transfer();
+                            mprint();
+                            sprint('i');
+                            sprint(i + 48);
+                            sprint('o');
+                            sprintln(o + 48);
+                        }
                     }
 
                 }
@@ -180,7 +239,14 @@ bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
                             undoplayfield();
                             return false;
                         }
-                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                        if (debug) {
+                            transfer();
+                            mprint();
+                            sprint('i');
+                            sprint(i + 48);
+                            sprint('o');
+                            sprintln(o + 48);
+                        }
                     }
                 }
             }
@@ -196,7 +262,14 @@ bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
                             undoplayfield();
                             return false;
                         }
-                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                        if (debug) {
+                            transfer();
+                            mprint();
+                            sprint('i');
+                            sprint(i + 48);
+                            sprint('o');
+                            sprintln(o + 48);
+                        }
                     }
                 }
             }
@@ -212,7 +285,14 @@ bool draw(const bool b[2][4], int color,bool ccheck) {  //handels piece drawing
                             undoplayfield();
                             return false;
                         }
-                        if(debug) {transfer();mprint();sprint('i');sprint(i+48);sprint('o');sprintln(o+48);}
+                        if (debug) {
+                            transfer();
+                            mprint();
+                            sprint('i');
+                            sprint(i + 48);
+                            sprint('o');
+                            sprintln(o + 48);
+                        }
                     }
                 }
             }
@@ -236,9 +316,9 @@ void undoplayfield() {
 }
 
 void pieceselect(int a) {
-    switch(a) {
+    switch (a) {
         case 0:
-           cnstcpy(piece, lp); // piece = lp;
+            cnstcpy(piece, lp); // piece = lp;
         case 1:
             cnstcpy(piece, lpm);// piece =lpm;
         case 2:
@@ -250,15 +330,24 @@ void pieceselect(int a) {
     }
 }
 
-void cnstcpy(bool a[2][4], const  bool b[2][4]) {
-    for(int i = 0; i < maxpiecesizex; i ++) {
-        for(int o = 0; o < maxpiecesizey; o ++) {
+void cnstcpy(bool a[2][4], const bool b[2][4]) {
+    for (int i = 0; i < maxpiecesizex; i++) {
+        for (int o = 0; o < maxpiecesizey; o++) {
             a[i][o] = b[i][o];
         }
 
     }
 }
 
+void linecheck() {
+    int c = 0;
+    int l = 0;
+    for(int i = 0; i < sizeplayfieldy -1; i ++) {
+        for(int o = 0; o < sizeplayfieldx -1; o ++) {
+            if (playfield[o][i] != 0) c++;
+        }
+    }
+}
 
 
 
