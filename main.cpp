@@ -53,7 +53,7 @@ int rotationold = 0;
 
 bool playerturn = false; //if true checks input if false does physicsgu
 const int timeout = 10; //timeout before new piece
-int timerem = 0;
+int timerem = 10;
 int score = 0;
 
 int main() {
@@ -73,9 +73,8 @@ void setup() {
     sbegin(9600);
     sprintln('1');
     posx = 3;
-    posy = 3;
-    playfield[1][4] = 5;
-    playfield[1][4] = 5;
+    posy = 0;
+    playfield[4][5] = 5;
     transfer();
     minit();
     mprint();
@@ -102,13 +101,14 @@ void loop() {
 
     */
 
-playerturn =  !playerturn;
+// playerturn =  !playerturn;
 if(playerturn) {
 
 }
 else {
-    posx += 1;
+    posy += 1;
     if(draw(piece, 1, true) == false) {
+        draw(piece,1,true);
         if(timerem == 0) timerem = timeout;
         if(timerem == 1) {
             posy = 3;
@@ -118,12 +118,16 @@ else {
             linecheck();
 
         }
+        else {
+            timerem --;
+        }
     }
 }
 
     transfer();
     mprint();
     draw(piece, 0, false);
+    transfer();
 
     delay(1000);
 }
@@ -170,7 +174,7 @@ void mprint() {  // does the actual drawing
     for (int i = 0; i < sizeM; i++) {
         for (int o = 0; o < sizeM; o++) {
             sprint(48 + a[o][i]);
-
+            sprint(' ');
         }
         sprintln(' ');
     }
@@ -193,7 +197,7 @@ void transfer() { //transfers playfield onto canvas, updates pos & rot
 
 bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only for playfield
     if (clearcheck) {
-        if (a[x][y] != 0 && x == 0 && y == 0) {
+        if (a[x][y] != 0) {
             return false;
         }
         playfield[x][y] = color;
@@ -312,6 +316,7 @@ void undoplayfield() {
     posy = posyold;
     rotation = rotationold;
     memcpy(playfield, playfieldold, sizeof(playfield));
+    mprint();
     sprintln('u');
 }
 
