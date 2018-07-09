@@ -74,7 +74,7 @@ void setup() {
     sprintln('1');
     posx = 3;
     posy = 0;
-    playfield[4][5] = 5;
+    //playfield[3][7] = 5;
     transfer();
     minit();
     mprint();

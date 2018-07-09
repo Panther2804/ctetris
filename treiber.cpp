@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 
 
 using namespace std;
@@ -38,7 +39,7 @@ int delay(int milisec)
     return 1;
 }
 
-void memcpy(int a[7][12], int b[7][12], int c) {
+void memcpy(int a[9][14], int b[9][14], int c) {
     a = b;
 }
 

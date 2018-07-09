@@ -17,7 +17,7 @@ void sbegin(int);
 
 int delay(int);
 
-void memcpy(int [7][12], int[7][12], int);
+void memcpy(int [9][14], int[9][14], int);
 
 
 

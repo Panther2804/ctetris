@@ -9,6 +9,7 @@ int main();
 
 void setup();
 void loop();
+
 void playfieldinit();
 void minit();
 void mprint();
@@ -18,5 +19,6 @@ void undoplayfield();
 bool draw(const bool[2][4],int,bool);
 void pieceselect(int);
 void cnstcpy(bool[2][4], const bool[2][4]);
+void linecheck();
 
 #endif //TETRISCLION_MAIN_H
