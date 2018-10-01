@@ -64,3 +64,17 @@ void memcpy(int a[9][14], int b[9][14], int c) {
     //    sprintln('c');
 }
 
+int pinread() {
+    char a;
+    cin >> a;
+    switch(a) {
+        case 'w': return 1;
+        case 's': return 2;
+        case 'a': return 3;
+        case 'd': return 4;
+        case ' ': return 0;
+        default: return 0;
+
+    }
+}
+

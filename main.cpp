@@ -109,26 +109,43 @@ void loop() {
 
     */
 
-// playerturn =  !playerturn;
+    playerturn =  !playerturn;
     if (playerturn) {
+        switch(pinread()) {
+            case 1: if(rotation<3) rotation ++;
+                    else rotation = 0;
+                    break;
+            case 2: if(rotation > 0) rotation--;
+                    else rotation = 3;
+                    break;
+            case 3: posx --;
+            break;
+            case 4: posx ++;
+            break;
+            default:
+                break;
 
+        }
     } else {
-        posy += 0;
-        if (draw(piece, 1, true) == false) {
-            draw(piece, 1, true);
-            if (timerem == 0) {
-                timerem = timeout;
-            } else if (timerem == 1) {
-                posy = 3;
-                posx = sizeplayfieldx / 2;
-                pieceselect(randomn(0, 6));
-                score++;
-                linecheck();
-            } else {
-                timerem--;
-            }
+        posy += 1;
+    }
+
+    if (draw(piece, 1, true) == false) {
+        draw(piece, 1, true);
+        if ((timerem == 0) && (!playerturn)) {
+            timerem = timeout;
+        } else if (timerem == 1) {
+            posy = 3;
+            posx = sizeplayfieldx / 2;
+            pieceselect(randomn(0, 6));
+            score++;
+            linecheck();
+        } else {
+            timerem--;
         }
     }
+
+
     mput(posx, posy, 4, false);
     transfer();
     mprint();
@@ -136,7 +153,6 @@ void loop() {
     transfer();
 
     delay(1000);
-    rotation ++;
 }
 
 void minit() {  //blanks the matrix (initializer)

@@ -25,6 +25,8 @@ int millis();
 
 int randomn(int, int);
 
+int pinread();
+
 
 
 
