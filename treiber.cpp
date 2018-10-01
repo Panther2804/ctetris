@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "main.h"
 
 
@@ -14,6 +16,19 @@ int fun() {
 //    std::cout << "Hello, World!" << std::endl;
     return 0;
 }
+
+void randomSeed(int i) {
+  srand(i);
+}
+
+int millis() {
+    return time(NULL);
+}
+
+int randomn(int min, int max) {
+    return rand() % (max - min) + max;
+}
+
 
 void sprint(char a) {
     std::cout << a;

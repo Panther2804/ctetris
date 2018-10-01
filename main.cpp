@@ -8,8 +8,8 @@ const bool debug = false;
 const bool SerialActive = true;
 
 const int sizeM = 12; //size of the matrix
-const int sizeplayfieldx = 10; //size of plafield (own layer in matrix)
-const int sizeplayfieldy = 10;
+const int sizeplayfieldx = 12; //size of plafield (own layer in matrix)
+const int sizeplayfieldy = 12;
 
 const int playfieldposx = 0; //offset of playfield
 const int playfieldposy = 0;
@@ -21,7 +21,6 @@ const int maxpiecesizey = 4;
 const bool lp[maxpiecesizex][maxpiecesizey] = {  //the l piece
         {1, 0, 0, 0},
         {1, 1, 1, 0},};
-
 
 bool lpm[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0}, //the mirrored l piece
                                           {1, 1, 1, 0},};
@@ -35,7 +34,15 @@ const bool line[maxpiecesizex][maxpiecesizey] = {{0, 0, 0, 0}, //the line
 const bool halfh[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0}, //the half h
                                                   {1, 1, 1, 0},};
 
-bool piece[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0},
+const bool squiggly[maxpiecesizex][maxpiecesizey] = {{0, 1, 1, 0}, //squiggly
+                                                  {1, 1, 0, 0},};
+
+const bool rsquiggly[maxpiecesizex][maxpiecesizey] = {{1, 1, 0, 0}, //reverse squiggly
+                                                     {0, 1, 1, 0},};
+
+
+
+bool piece[maxpiecesizex][maxpiecesizey] = {{0, 0, 1, 0},
                                             {1, 1, 1, 0},};
 
 int playfield[sizeplayfieldx][sizeplayfieldy];
@@ -45,7 +52,8 @@ int a[sizeM][sizeM];
 
 int posx = 0;  //position and rotation of the piece
 int posy = 0;
-int rotation = 0;
+int rotation = 3;
+int ccolor = 1;
 
 int posxold = 0;  //position and rotation of the "old" piece
 int posyold = 0;
@@ -68,12 +76,12 @@ void setup() {
 
     // put your setup code here, to run once:
 
-    srand(1);
+    randomSeed(millis());
     playfieldinit();
     sbegin(9600);
     sprintln('1');
-    posx = 3;
-    posy = 0;
+    posx = 5;
+    posy = 2;
     //playfield[3][7] = 5;
     transfer();
     minit();
@@ -105,7 +113,7 @@ void loop() {
     if (playerturn) {
 
     } else {
-        posy += 1;
+        posy += 0;
         if (draw(piece, 1, true) == false) {
             draw(piece, 1, true);
             if (timerem == 0) {
@@ -113,7 +121,7 @@ void loop() {
             } else if (timerem == 1) {
                 posy = 3;
                 posx = sizeplayfieldx / 2;
-                pieceselect(1);
+                pieceselect(randomn(0, 6));
                 score++;
                 linecheck();
             } else {
@@ -121,13 +129,14 @@ void loop() {
             }
         }
     }
-
+    mput(posx, posy, 4, false);
     transfer();
     mprint();
     draw(piece, 0, false);
     transfer();
 
     delay(1000);
+    rotation ++;
 }
 
 void minit() {  //blanks the matrix (initializer)
@@ -230,7 +239,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
                 for (int i = 0; i < maxpiecesizex; i++) {
                     for (int o = 0; o < maxpiecesizey; o++) {
                         if (b[i][o]) {
-                            if (mput(posx + i, posy + o, color, true) == false) {
+                            if (mput(posx + i - 1, posy + o - 1, color, true) == false) {
                                 undoplayfield();
                                 return false;
                             }
@@ -243,7 +252,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        mput(posx + i, posy + o, color, false);
+                        mput(posx + i -1, posy + o - 1, color, false);
 
                         if (debug) {
                             transfer();
@@ -267,7 +276,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
                 for (int i = 0; i < maxpiecesizex; i++) {
                     for (int o = 0; o < maxpiecesizey; o++) {
                         if (b[i][o]) {
-                            if (mput(posx + i, posy - o, color, true) == false) {
+                            if (mput(posx + o - 1, posy - i + 1, color, true) == false) {
                                 undoplayfield();
                                 return false;
                             }
@@ -280,7 +289,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        mput(posx + i, posy - o, color, false);
+                        mput(posx + o - 1, posy - i + 1, color, false);
 
                         if (debug) {
                             transfer();
@@ -304,7 +313,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
                 for (int i = 0; i < maxpiecesizex; i++) {
                     for (int o = 0; o < maxpiecesizey; o++) {
                         if (b[i][o]) {
-                            if (mput(posx - i, posy - o, color, true) == false) {
+                            if (mput(posx - i + 1, posy - o + 1, color, true) == false) {
                                 undoplayfield();
                                 return false;
                             }
@@ -317,7 +326,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        mput(posx - i, posy - o, color, false);
+                        mput(posx - i + 1, posy - o + 1 , color, false);
 
                         if (debug) {
                             transfer();
@@ -342,7 +351,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
                 for (int i = 0; i < maxpiecesizex; i++) {
                     for (int o = 0; o < maxpiecesizey; o++) {
                         if (b[i][o]) {
-                            if (mput(posx - i, posy + o, color, true) == false) {
+                            if (mput(posx - o + 1, posy + i - 1, color, true) == false) {
                                 undoplayfield();
                                 return false;
                             }
@@ -355,7 +364,7 @@ bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        mput(posx - i, posy + o, color, false);
+                        mput(posx - o + 1, posy + i - 1, color, false);
 
                         if (debug) {
                             transfer();
@@ -391,15 +400,29 @@ void pieceselect(int a) {
     switch (a) {
         case 0:
             cnstcpy(piece, lp); // piece = lp;
+            break;
         case 1:
             cnstcpy(piece, lpm);// piece =lpm;
+            break;
         case 2:
             cnstcpy(piece, cube);//piece =cube;
+            break;
         case 3:
             cnstcpy(piece, line);//piece =line;
+            break;
         case 4:
-            cnstcpy(piece, halfh);//piece =halfh;
+            cnstcpy(piece, halfh);//piece =halfh
+            break;
+        case 5:
+            cnstcpy(piece, squiggly);
+            break;
+        case 6:
+            cnstcpy(piece, rsquiggly);
+            break;
+
     }
+
+
 }
 
 void cnstcpy(bool a[2][4], const bool b[2][4]) {

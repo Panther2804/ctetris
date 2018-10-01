@@ -19,6 +19,12 @@ int delay(int);
 
 void memcpy(int [9][14], int[9][14], int);
 
+void randomSeed(int);
+
+int millis();
+
+int randomn(int, int);
+
 
 
 
