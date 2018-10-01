@@ -8,8 +8,8 @@ const bool debug = false;
 const bool SerialActive = true;
 
 const int sizeM = 12; //size of the matrix
-const int sizeplayfieldx = 9; //size of plafield (own layer in matrix)
-const int sizeplayfieldy = 14;
+const int sizeplayfieldx = 10; //size of plafield (own layer in matrix)
+const int sizeplayfieldy = 10;
 
 const int playfieldposx = 0; //offset of playfield
 const int playfieldposy = 0;
@@ -39,7 +39,7 @@ bool piece[maxpiecesizex][maxpiecesizey] = {{0, 1, 0, 0},
                                             {1, 1, 1, 0},};
 
 int playfield[sizeplayfieldx][sizeplayfieldy];
-int playfieldold[sizeplayfieldx][sizeplayfieldy];
+
 
 int a[sizeM][sizeM];
 
@@ -102,27 +102,25 @@ void loop() {
     */
 
 // playerturn =  !playerturn;
-if(playerturn) {
+    if (playerturn) {
 
-}
-else {
-    posy += 1;
-    if(draw(piece, 1, true) == false) {
-        draw(piece,1,true);
-        if(timerem == 0) timerem = timeout;
-        if(timerem == 1) {
-            posy = 3;
-            posx = sizeplayfieldx/2;
-            pieceselect(1);
-            score ++;
-            linecheck();
-
-        }
-        else {
-            timerem --;
+    } else {
+        posy += 1;
+        if (draw(piece, 1, true) == false) {
+            draw(piece, 1, true);
+            if (timerem == 0) {
+                timerem = timeout;
+            } else if (timerem == 1) {
+                posy = 3;
+                posx = sizeplayfieldx / 2;
+                pieceselect(1);
+                score++;
+                linecheck();
+            } else {
+                timerem--;
+            }
         }
     }
-}
 
     transfer();
     mprint();
@@ -149,24 +147,25 @@ void playfieldinit() {  //blanks the playfield (initializer)
     }
 
 
-    for (int i = 0; i < sizeplayfieldx; i++) {
+    for (int i = 0; i < sizeplayfieldy; i++) { //left
         playfield[0][i] = 2;
     }
 
-    for (int i = sizeplayfieldy - 1; i < sizeplayfieldx; i++) {
-        playfield[0][i] = 2;
+    for (int i = 0; i < sizeplayfieldy; i++) { //right
+        playfield[sizeplayfieldx-1][i] = 2;
     }
 
-    for (int i = 0; i < sizeplayfieldy; i++) {
+    for (int i = 0; i < sizeplayfieldy; i++) {//top
         playfield[i][0] = 2;
     }
 
-    for (int i = 0; i < sizeplayfieldy; i++) {
-        playfield[i][sizeplayfieldx - 1] = 2;
+    for (int i = 0; i < sizeplayfieldy; i++) { //bottom
+        playfield[i][sizeplayfieldy - 1] = 2;
     }
+   playfieldprint();
 
 
-    memcpy(playfield, playfieldold, sizeof(playfield));
+
 }
 
 
@@ -181,12 +180,24 @@ void mprint() {  // does the actual drawing
     sprintln('-');
 }
 
+void playfieldprint() {  // does the actual drawing (debug)
+    for (int i = 0; i < sizeplayfieldy; i++) {
+        for (int o = 0; o < sizeplayfieldx; o++) {
+            sprint(48 + playfield[o][i]);
+            sprint(' ');
+        }
+        sprintln(' ');
+    }
+    sprintln('p');
+}
+
+
 
 void transfer() { //transfers playfield onto canvas, updates pos & rot
     posxold = posx;
     posyold = posy;
     rotationold = rotation;
-    memcpy(playfieldold, playfield, sizeof(playfield));
+
     for (int i = 0; i < sizeplayfieldx; i++) {
         for (int o = 0; o < sizeplayfieldy; o++) {
             a[playfieldposx + i][playfieldposy + o] = playfield[i][o];
@@ -200,25 +211,40 @@ bool mput(int x, int y, int color, bool clearcheck) { //'collision' check //only
         if (a[x][y] != 0) {
             return false;
         }
+        else return true;
+
+    }
+    else {
         playfield[x][y] = color;
         return true;
     }
-    playfield[x][y] = color;
-    return true;
+
 }
 
 
-bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
+bool draw(const bool b[][4], int color, bool ccheck) {  //handels piece drawing
     switch (rotation) {
 
         case 0: //no rot
+            if(ccheck) {
+                for (int i = 0; i < maxpiecesizex; i++) {
+                    for (int o = 0; o < maxpiecesizey; o++) {
+                        if (b[i][o]) {
+                            if (mput(posx + i, posy + o, color, true) == false) {
+                                undoplayfield();
+                                return false;
+                            }
+                        }
+
+                    }
+                }
+            }
+
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx + i, posy + o, color, ccheck) == false) {
-                            undoplayfield();
-                            return false;
-                        }
+                        mput(posx + i, posy + o, color, false);
+
                         if (debug) {
                             transfer();
                             mprint();
@@ -236,13 +262,26 @@ bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
             break;
 
         case 1:  //one clockwise
+
+            if(ccheck) {
+                for (int i = 0; i < maxpiecesizex; i++) {
+                    for (int o = 0; o < maxpiecesizey; o++) {
+                        if (b[i][o]) {
+                            if (mput(posx + i, posy - o, color, true) == false) {
+                                undoplayfield();
+                                return false;
+                            }
+                        }
+
+                    }
+                }
+            }
+
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx + o, posy - i, color, ccheck) == false) {
-                            undoplayfield();
-                            return false;
-                        }
+                        mput(posx + i, posy - o, color, false);
+
                         if (debug) {
                             transfer();
                             mprint();
@@ -252,6 +291,7 @@ bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
                             sprintln(o + 48);
                         }
                     }
+
                 }
             }
             return true;
@@ -259,13 +299,26 @@ bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
             break;
 
         case 2: //upside down
+
+            if(ccheck) {
+                for (int i = 0; i < maxpiecesizex; i++) {
+                    for (int o = 0; o < maxpiecesizey; o++) {
+                        if (b[i][o]) {
+                            if (mput(posx - i, posy - o, color, true) == false) {
+                                undoplayfield();
+                                return false;
+                            }
+                        }
+
+                    }
+                }
+            }
+
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx - i, posy - o, color, ccheck) == false) {
-                            undoplayfield();
-                            return false;
-                        }
+                        mput(posx - i, posy - o, color, false);
+
                         if (debug) {
                             transfer();
                             mprint();
@@ -275,20 +328,35 @@ bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
                             sprintln(o + 48);
                         }
                     }
+
                 }
             }
             return true;
 
             break;
+
 
         case 3: //one counterclockwise
+
+            if(ccheck) {
+                for (int i = 0; i < maxpiecesizex; i++) {
+                    for (int o = 0; o < maxpiecesizey; o++) {
+                        if (b[i][o]) {
+                            if (mput(posx - i, posy + o, color, true) == false) {
+                                undoplayfield();
+                                return false;
+                            }
+                        }
+
+                    }
+                }
+            }
+
             for (int i = 0; i < maxpiecesizex; i++) {
                 for (int o = 0; o < maxpiecesizey; o++) {
                     if (b[i][o]) {
-                        if (mput(posx - o, posy + i, color, ccheck) == false) {
-                            undoplayfield();
-                            return false;
-                        }
+                        mput(posx - i, posy + o, color, false);
+
                         if (debug) {
                             transfer();
                             mprint();
@@ -298,11 +366,13 @@ bool draw(const bool b[2][4], int color, bool ccheck) {  //handels piece drawing
                             sprintln(o + 48);
                         }
                     }
+
                 }
             }
             return true;
 
             break;
+
         default:
             sprintln('r');
             rotation = 0;
@@ -315,9 +385,6 @@ void undoplayfield() {
     posx = posxold;
     posy = posyold;
     rotation = rotationold;
-    memcpy(playfield, playfieldold, sizeof(playfield));
-    mprint();
-    sprintln('u');
 }
 
 void pieceselect(int a) {
@@ -347,8 +414,8 @@ void cnstcpy(bool a[2][4], const bool b[2][4]) {
 void linecheck() {
     int c = 0;
     int l = 0;
-    for(int i = 0; i < sizeplayfieldy -1; i ++) {
-        for(int o = 0; o < sizeplayfieldx -1; o ++) {
+    for (int i = 0; i < sizeplayfieldy - 1; i++) {
+        for (int o = 0; o < sizeplayfieldx - 1; o++) {
             if (playfield[o][i] != 0) c++;
         }
     }

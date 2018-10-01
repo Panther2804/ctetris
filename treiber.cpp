@@ -40,6 +40,12 @@ int delay(int milisec)
 }
 
 void memcpy(int a[9][14], int b[9][14], int c) {
-    a = b;
+        for(int i = 0; i < 9; i ++) {
+            for (int o; o < 14; o++) {
+                a[i][o] = b[i][o];
+            }
+        }
+   //     mprint();
+    //    sprintln('c');
 }
 
