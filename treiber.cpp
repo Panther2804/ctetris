@@ -38,6 +38,10 @@ void sprintln(char a) {
     std::cout << a << std::endl;
 }
 
+void intprint(int score) {
+    std::cout << to_string(score) << std::endl;
+}
+
 void sbegin(int a) {
 
 }

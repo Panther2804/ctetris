@@ -60,8 +60,10 @@ int posyold = 0;
 int rotationold = 0;
 
 bool playerturn = false; //if true checks input if false does physicsgu
-const int timeout = 10; //timeout before new piece
-int timerem = 10;
+const int timeout = 5; //timeout before new piece
+        const int basescore = 100;
+        const int basemult = 1.5;
+int timerem = 4;
 int score = 0;
 
 int main() {
@@ -109,6 +111,13 @@ void loop() {
 
     */
 
+
+
+
+
+
+
+
     playerturn =  !playerturn;
     if (playerturn) {
         switch(pinread()) {
@@ -128,6 +137,7 @@ void loop() {
         }
     } else {
         posy += 1;
+        delay(500);
     }
 
     if (draw(piece, 1, true) == false) {
@@ -137,11 +147,12 @@ void loop() {
         } else if (timerem == 1) {
             posy = 3;
             posx = sizeplayfieldx / 2;
-            pieceselect(randomn(0, 6));
-            score++;
+            pieceselect(randomn(0, 7));
             linecheck();
+            timerem = 0;
         } else {
             timerem--;
+            sprintln(timerem + 48);
         }
     }
 
@@ -151,8 +162,11 @@ void loop() {
     mprint();
     draw(piece, 0, false);
     transfer();
-
+    linecheck();
     delay(1000);
+
+
+
 }
 
 void minit() {  //blanks the matrix (initializer)
@@ -451,12 +465,25 @@ void cnstcpy(bool a[2][4], const bool b[2][4]) {
 }
 
 void linecheck() {
-    int c = 0;
-    int l = 0;
-    for (int i = 0; i < sizeplayfieldy - 1; i++) {
-        for (int o = 0; o < sizeplayfieldx - 1; o++) {
+    int c;
+    int l;
+
+    for (int i = sizeplayfieldy - 2; i > 0; i--) {
+        c = 0;
+        for (int o = 1; o < sizeplayfieldx - 1; o++) {
             if (playfield[o][i] != 0) c++;
+            if(c == sizeplayfieldx - 2) {
+                l ++;
+                for(int p = i; p > 1; p --) {
+                    for(int k = 1; k < sizeplayfieldx - 2; k ++) {
+                        playfield[k][p] = playfield[k][p - 1];
+                    }
+
+                }
+            }
         }
+        score += basescore * basemult^l;
+
     }
 }
 

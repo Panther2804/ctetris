@@ -27,6 +27,8 @@ int randomn(int, int);
 
 int pinread();
 
+void intprint(int);
+
 
 
 
