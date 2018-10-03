@@ -27,7 +27,13 @@ int randomn(int, int);
 
 int pinread();
 
-void intprint(int);
+void stripeinit();
+
+void stripeshow();
+
+void pindef();
+
+
 
 
 

@@ -61,8 +61,9 @@ int rotationold = 0;
 
 bool playerturn = false; //if true checks input if false does physicsgu
 const int timeout = 5; //timeout before new piece
-        const int basescore = 100;
-        const int basemult = 1.5;
+const int basescore = 100;
+const int basemult = 1.5;
+const int gameoverY = 3;
 int timerem = 4;
 int score = 0;
 
@@ -76,48 +77,17 @@ int main() {
 
 void setup() {
 
-    // put your setup code here, to run once:
 
-    randomSeed(millis());
-    playfieldinit();
+    pindef();
     sbegin(9600);
-    sprintln('1');
-    posx = 5;
-    posy = 2;
-    //playfield[3][7] = 5;
-    transfer();
-    minit();
-    mprint();
+    setuptetris();
+
 
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    /*
-    delay(1000);
-    sprintln(rotation + 48);
-    pieceselect(1);
 
-    draw(piece, 1, true); //draw new piece
-
-    transfer();
-    mprint();
-    draw(piece, 0, false); //undraw old piece
-    //transfer(); //undo later (debug code)
-    //mprint(); //undo later
-
-
-    delay(1000);
-
-    */
-
-
-
-
-
-
-
-
+    
     playerturn =  !playerturn;
     if (playerturn) {
         switch(pinread()) {
@@ -137,24 +107,34 @@ void loop() {
         }
     } else {
         posy += 1;
-        delay(500);
     }
 
-    if (draw(piece, 1, true) == false) {
-        draw(piece, 1, true);
+    if (draw(piece, ccolor, true) == false) {
+        if (playerturn) draw(piece, 1, true);
+        else draw(piece, ccolor, true);
         if ((timerem == 0) && (!playerturn)) {
             timerem = timeout;
-        } else if (timerem == 1) {
-            posy = 3;
-            posx = sizeplayfieldx / 2;
+        } else if ((timerem == 1) || (timerem < 0)) {
+
             pieceselect(randomn(0, 7));
             linecheck();
             timerem = 0;
+            if(posy == gameoverY) {
+                setuptetris();
+            }
+            posy = gameoverY;
+            posx = sizeplayfieldx / 2;
         } else {
             timerem--;
             sprintln(timerem + 48);
         }
     }
+    else {
+        sprintln(timerem + 48);
+        if((!playerturn) && (timerem != 0)) timerem = 0;
+        sprintln('r');
+    }
+
 
 
     mput(posx, posy, 4, false);
@@ -163,16 +143,32 @@ void loop() {
     draw(piece, 0, false);
     transfer();
     linecheck();
-    delay(1000);
+    //delay(100);
 
 
 
+}
+
+
+void setuptetris() {
+    randomSeed(millis());
+    posy = gameoverY;
+    posx = sizeplayfieldx / 2;
+    pieceselect(4);
+    playfieldinit();
+    minit();
+    draw(piece,ccolor,true);
+    transfer();
+    mprint();
 }
 
 void minit() {  //blanks the matrix (initializer)
     for (int i = 0; i < sizeM; i++) {
         for (int o = 0; o < sizeM; o++) {
             a[i][o] = 0;
+            stripeshow();
+            mprint();
+            delay(50);
         }
     }
 }
@@ -430,24 +426,31 @@ void pieceselect(int a) {
     switch (a) {
         case 0:
             cnstcpy(piece, lp); // piece = lp;
+            ccolor = 9;
             break;
         case 1:
             cnstcpy(piece, lpm);// piece =lpm;
+            ccolor = 8;
             break;
         case 2:
             cnstcpy(piece, cube);//piece =cube;
+            ccolor = 4;
             break;
         case 3:
             cnstcpy(piece, line);//piece =line;
+            ccolor = 3;
             break;
         case 4:
             cnstcpy(piece, halfh);//piece =halfh
+            ccolor = 5;
             break;
         case 5:
             cnstcpy(piece, squiggly);
+            ccolor = 6;
             break;
         case 6:
             cnstcpy(piece, rsquiggly);
+            ccolor = 7;
             break;
 
     }
@@ -485,6 +488,10 @@ void linecheck() {
         score += basescore * basemult^l;
 
     }
+
+
+
+
 }
 
 
